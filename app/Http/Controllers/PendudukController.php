@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Penduduk;     
 use App\Models\KartuKeluarga;
+use App\Exports\PendudukExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PendudukController extends Controller
 {
@@ -93,5 +95,10 @@ class PendudukController extends Controller
         $penduduk = Penduduk::findOrFail($id);
         $penduduk->delete();
         return redirect()->route('penduduk.index')->with('success', 'Data Penduduk Berhasil Dihapus!');
+    }
+    public function exportExcel()
+    {
+        // Nama file saat didownload nanti: data-penduduk-tanggal.xlsx
+        return Excel::download(new PendudukExport, 'data-penduduk-' . date('Y-m-d') . '.xlsx');
     }
 }

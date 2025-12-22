@@ -16,12 +16,19 @@
                 class="absolute inset-y-0 right-0 px-4 text-white bg-blue-600 rounded-r-lg hover:bg-blue-700 font-bold text-sm">Cari</button>
         </form>
 
-        @if (auth()->user()->role == 'admin')
-            <a href="{{ route('penduduk.create') }}"
-                class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded shadow">
-                <i class="fas fa-plus mr-2"></i>Tambah Warga
+        <div class="flex gap-2">
+            <a href="{{ route('penduduk.export-excel') }}" target="_blank"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
+                <i class="fas fa-file-excel mr-2"></i>Export Excel
             </a>
-        @endif
+
+            @if (auth()->user()->role == 'admin')
+                <a href="{{ route('penduduk.create') }}"
+                    class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
+                    <i class="fas fa-plus mr-2"></i>Tambah Warga
+                </a>
+            @endif
+        </div>
     </div>
 
     @if (session('success'))
