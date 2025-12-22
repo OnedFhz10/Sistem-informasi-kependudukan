@@ -7,6 +7,7 @@ use App\Models\Penduduk;
 use App\Models\KartuKeluarga;
 use App\Exports\PendudukExport;
 use Maatwebsite\Excel\Facades\Excel;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PendudukController extends Controller
 {
@@ -100,5 +101,19 @@ class PendudukController extends Controller
     {
         // Nama file saat didownload nanti: data-penduduk-tanggal.xlsx
         return Excel::download(new PendudukExport, 'data-penduduk-' . date('Y-m-d') . '.xlsx');
+    }
+    public function exportPdf()
+    {
+        // Ambil data penduduk (bisa ditambah logic filter jika perlu)
+        $penduduks = \App\Models\Penduduk::all();
+
+        // Load view yang tadi kita buat
+        $pdf = Pdf::loadView('penduduk.pdf', compact('penduduks'));
+
+        // Atur ukuran kertas (A4 Landscape agar tabel muat)
+        $pdf->setPaper('a4', 'landscape');
+
+        // Download file
+        return $pdf->download('laporan-penduduk-' . date('Y-m-d') . '.pdf');
     }
 }

@@ -41,7 +41,9 @@ Route::middleware('auth')->group(function () {
     Route::get('/rt', [RtController::class, 'index'])->name('rt.index');                // <-- Agar menu RT jalan
 
     Route::get('/penduduk/export-excel', [PendudukController::class, 'exportExcel'])->name('penduduk.export-excel');
-    
+
+    Route::get('/penduduk/export-pdf', [PendudukController::class, 'exportPdf'])->name('penduduk.export-pdf');
+
     // --- KHUSUS ADMIN (FULL AKSES: Create, Edit, Delete) ---
     Route::middleware(['is_admin'])->group(function () {
         

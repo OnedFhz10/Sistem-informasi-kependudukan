@@ -19,13 +19,18 @@
         <div class="flex gap-2">
             <a href="{{ route('penduduk.export-excel') }}" target="_blank"
                 class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
-                <i class="fas fa-file-excel mr-2"></i>Export Excel
+                <i class="fas fa-file-excel mr-2"></i>Excel
+            </a>
+
+            <a href="{{ route('penduduk.export-pdf') }}" target="_blank"
+                class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
+                <i class="fas fa-file-pdf mr-2"></i>PDF
             </a>
 
             @if (auth()->user()->role == 'admin')
                 <a href="{{ route('penduduk.create') }}"
                     class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow transition duration-200">
-                    <i class="fas fa-plus mr-2"></i>Tambah Warga
+                    <i class="fas fa-plus mr-2"></i>Tambah
                 </a>
             @endif
         </div>
