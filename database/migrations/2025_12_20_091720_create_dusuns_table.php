@@ -13,7 +13,8 @@ return new class extends Migration
 {
     Schema::create('dusuns', function (Blueprint $table) {
         $table->id();
-        $table->string('nama'); // Contoh: Dusun Wage
+        $table->string('nama');
+        $table->string('kepala_dusun')->nullable();
         $table->timestamps();
     });
 }

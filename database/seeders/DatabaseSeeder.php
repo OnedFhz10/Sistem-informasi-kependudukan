@@ -7,24 +7,22 @@ use App\Models\User;
 use App\Models\Dusun;
 use App\Models\Rw;
 use App\Models\Rt;
-use App\Models\Kampung;
 use App\Models\KartuKeluarga;
 use App\Models\Penduduk;
-use Illuminate\Support\Facades\Hash; // <--- PENTING!
+use Illuminate\Support\Facades\Hash;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Buat User ADMIN
+        // 1. User Admin & Staff
         User::create([
             'name' => 'Admin Desa',
             'email' => 'admin@desa.com',
-            'password' => Hash::make('password123'), // Password di-hash
+            'password' => Hash::make('password123'),
             'role' => 'admin',
         ]);
 
-        // 2. Buat User STAFF
         User::create([
             'name' => 'Staff Desa',
             'email' => 'staff@desa.com',
@@ -32,13 +30,13 @@ class DatabaseSeeder extends Seeder
             'role' => 'staff',
         ]);
 
-        // 3. Data Wilayah Dummy
-        $dusun = Dusun::create(['nama' => 'Dusun Mawar']);
-        $rw = Rw::create(['dusun_id' => $dusun->id, 'nomor' => '01']);
-        $rt = Rt::create(['rw_id' => $rw->id, 'nomor' => '01']);
-        Kampung::create(['nama_kampung' => 'Kampung Durian', 'kepala_kampung' => 'Pak Asep']);
-
-        // 4. KK Dummy
+        // 2. Data Wilayah (Tanpa Kampung)
+        // Dusun -> RW -> RT
+        $dusun = Dusun::create(['nama' => 'Dusun Mawar', 'kepala_dusun' => 'Bapak Mawar']);
+        $rw = Rw::create(['dusun_id' => $dusun->id, 'nomor' => '01','kepala_rw' => 'Bapak Ketua RW 01']);
+        $rt = Rt::create(['rw_id' => $rw->id, 'nomor' => '01','Bapak Ketua RT 01']);
+        
+        // 3. KK Dummy
         $kk = KartuKeluarga::create([
             'nomor_kk' => '3201010101010001',
             'kepala_keluarga' => 'Budi Santoso',
@@ -49,7 +47,7 @@ class DatabaseSeeder extends Seeder
             'kode_pos' => '16900',
         ]);
 
-        // 5. Penduduk Dummy
+        // 4. Penduduk Dummy
         Penduduk::create([
             'kartu_keluarga_id' => $kk->id,
             'nik' => '3201010101010002',
@@ -58,11 +56,9 @@ class DatabaseSeeder extends Seeder
             'tanggal_lahir' => '1985-05-20',
             'jenis_kelamin' => 'L',
             'status' => 'aktif',
-            'pekerjaan' => 'Petani/Pekebun',
-            'pendidikan' => 'SLTA/Sederajat',
+            'pekerjaan' => 'Petani',
+            'pendidikan' => 'SLTA',
             'status_hubungan' => 'Kepala Keluarga',
-            'nama_ayah' => 'Suparman',
-            'nama_ibu' => 'Siti Aminah',
         ]);
     }
 }

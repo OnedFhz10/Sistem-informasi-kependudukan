@@ -17,6 +17,11 @@
                         class="w-full border p-2 rounded focus:ring-2 focus:ring-yellow-500" required>
                 </div>
                 <div class="mb-4">
+                    <label class="block text-gray-700 font-bold mb-2">Nama Kepala RW</label>
+                    <input type="text" name="kepala_rw" value="{{ old('kepala_rw') }}" class="w-full border p-2 rounded"
+                        placeholder="Nama Bapak/Ibu RW">
+                </div>
+                <div class="mb-4">
                     <label class="block text-gray-700 font-bold mb-2">Pilih Dusun</label>
                     <select name="dusun_id" class="w-full border p-2 rounded bg-white" required>
                         @foreach ($dusuns as $d)

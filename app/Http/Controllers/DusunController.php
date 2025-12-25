@@ -9,8 +9,11 @@ class DusunController extends Controller
 {
     public function index()
     {
-        // Hitung jumlah RW di dalam dusun ini
-        $dusuns = Dusun::withCount('rws')->latest()->paginate(10);
+        // Ambil data Dusun + Hitung jumlah anak-anaknya otomatis
+        $dusuns = Dusun::withCount(['rws', 'rts', 'kartuKeluargas', 'penduduks'])
+                        ->latest()
+                        ->paginate(10);
+
         return view('dusun.index', compact('dusuns'));
     }
 

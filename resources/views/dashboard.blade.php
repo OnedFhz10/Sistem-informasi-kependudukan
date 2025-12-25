@@ -44,18 +44,6 @@
         </div>
 
         <div
-            class="bg-white rounded-lg shadow-md p-6 border-l-4 border-indigo-500 flex items-center justify-between transition hover:shadow-lg">
-            <div>
-                <p class="text-gray-500 text-sm font-bold uppercase tracking-wide">Total Kampung</p>
-                <h3 class="text-3xl font-extrabold text-gray-800 mt-1">{{ $totalKampung }} <span
-                        class="text-sm font-normal text-gray-400">Lokasi</span></h3>
-            </div>
-            <div class="bg-indigo-100 p-3 rounded-full text-indigo-600">
-                <i class="fas fa-home text-2xl"></i>
-            </div>
-        </div>
-
-        <div
             class="bg-white rounded-lg shadow-md p-6 border-l-4 border-yellow-500 flex items-center justify-between transition hover:shadow-lg">
             <div>
                 <p class="text-gray-500 text-sm font-bold uppercase tracking-wide">Total RW</p>

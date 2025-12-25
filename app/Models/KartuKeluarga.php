@@ -6,38 +6,30 @@ use Illuminate\Database\Eloquent\Model;
 
 class KartuKeluarga extends Model
 {
-    protected $fillable = [
-        'nomor_kk', 
-        'kepala_keluarga', 
-        'rt_id', 
-        'rw_id',    // <-- Tambahan
-        'dusun_id', // <-- Tambahan
-        'alamat_lengkap', 
-        'kode_pos', 
-        'kecamatan', 
-        'kabupaten', 
-        'provinsi'
-    ];
+    protected $guarded = ['id']; // Membolehkan semua kolom diisi (kecuali ID)
 
     // --- RELASI ---
-    public function penduduks()
-    {
-        return $this->hasMany(Penduduk::class);
-    }
+    public function rt() { return $this->belongsTo(Rt::class); }
+    public function rw() { return $this->belongsTo(Rw::class); }
+    public function dusun() { return $this->belongsTo(Dusun::class); }
+    public function penduduks() { return $this->hasMany(Penduduk::class); }
 
-    public function rt()
+    // --- LOGIKA OTOMATIS (AUTO FILL) ---
+    protected static function boot()
     {
-        return $this->belongsTo(Rt::class);
-    }
+        parent::boot();
 
-    // Tambahkan relasi ke RW dan Dusun juga
-    public function rw()
-    {
-        return $this->belongsTo(Rw::class);
-    }
-
-    public function dusun()
-    {
-        return $this->belongsTo(Dusun::class);
+        // Event ini jalan otomatis SEBELUM data disimpan (Create/Update)
+        static::saving(function ($kk) {
+            // Jika user memilih RT, kita cari RW dan Dusun-nya otomatis
+            if ($kk->rt_id) {
+                $rt = Rt::with('rw.dusun')->find($kk->rt_id);
+                
+                if ($rt) {
+                    $kk->rw_id = $rt->rw_id;          // Isi RW otomatis
+                    $kk->dusun_id = $rt->rw->dusun_id;// Isi Dusun otomatis
+                }
+            }
+        });
     }
 }

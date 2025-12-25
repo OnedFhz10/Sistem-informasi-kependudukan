@@ -15,6 +15,7 @@ return new class extends Migration
         $table->id();
         $table->foreignId('rw_id')->constrained('rws')->onDelete('cascade');
         $table->string('nomor'); // Contoh: 005
+        $table->string('kepala_rt')->nullable();
         $table->timestamps();
     });
 }

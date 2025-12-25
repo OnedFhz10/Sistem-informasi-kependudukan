@@ -4,63 +4,69 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Rt;
-use App\Models\Rw; // Kita butuh RW untuk dropdown
+use App\Models\Rw;
 
 class RtController extends Controller
 {
     public function index()
     {
-        // Ambil RT, info RW & Dusun, serta hitung jumlah KK
-        $rts = Rt::with('rw.dusun')->withCount('kartuKeluargas')->latest()->paginate(10);
+        // Load data RT beserta RW-nya (dan Dusun dari RW)
+        // Hitung KK dan Penduduk
+        $rts = Rt::with('rw.dusun')
+                 ->withCount(['kartuKeluargas', 'penduduks'])
+                 ->latest()
+                 ->paginate(10);
+
         return view('rt.index', compact('rts'));
     }
 
     public function create()
     {
-        // Ambil semua Dusun (untuk dropdown pertama)
-        $dusuns = \App\Models\Dusun::all();
-        
-        // Ambil semua RW (untuk data mentah yang akan difilter oleh Javascript)
-        $rws = \App\Models\Rw::all(); 
-
-        return view('rt.create', compact('dusuns', 'rws'));
+        // Ambil data RW (lengkap dengan nama dusunnya biar jelas saat dipilih)
+        $rws = Rw::with('dusun')->get();
+        return view('rt.create', compact('rws'));
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'rw_id' => 'required|exists:rws,id',
-            'nomor' => 'required|string|max:10'
+            'nomor' => 'required|string|max:5',
+            'kepala_rt' => 'nullable|string|max:255',
         ]);
+
         Rt::create($request->all());
+
         return redirect()->route('rt.index')->with('success', 'RT Berhasil Ditambahkan');
     }
 
     public function edit($id)
     {
-        // Ambil data RT yang mau diedit beserta relasi RW-nya
-        $rt = Rt::with('rw')->findOrFail($id);
-        
-        // Ambil data Master untuk dropdown
-        $dusuns = \App\Models\Dusun::all();
-        $rws = \App\Models\Rw::all(); 
-
-        return view('rt.edit', compact('rt', 'dusuns', 'rws'));
+        $rt = Rt::findOrFail($id);
+        $rws = Rw::with('dusun')->get();
+        return view('rt.edit', compact('rt', 'rws'));
     }
 
     public function update(Request $request, $id)
     {
         $request->validate([
             'rw_id' => 'required|exists:rws,id',
-            'nomor' => 'required|string|max:10'
+            'nomor' => 'required|string|max:5',
+            'kepala_rt' => 'nullable|string|max:255',
         ]);
+
         Rt::findOrFail($id)->update($request->all());
+
         return redirect()->route('rt.index')->with('success', 'RT Berhasil Diupdate');
     }
 
     public function destroy($id)
     {
-        Rt::findOrFail($id)->delete();
-        return redirect()->route('rt.index')->with('success', 'RT Berhasil Dihapus');
+        try {
+            Rt::findOrFail($id)->delete();
+            return redirect()->route('rt.index')->with('success', 'RT Berhasil Dihapus');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal hapus. Pastikan data KK di dalamnya kosong.');
+        }
     }
 }

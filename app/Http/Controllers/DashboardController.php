@@ -8,7 +8,6 @@ use App\Models\KartuKeluarga;
 use App\Models\Dusun;
 use App\Models\Rw;
 use App\Models\Rt;
-use App\Models\Kampung;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -21,7 +20,6 @@ class DashboardController extends Controller
         
         // Data Wilayah
         $totalDusun    = Dusun::count();
-        $totalKampung  = Kampung::count(); // <-- Variabel penting
         $totalRW       = Rw::count();      
         $totalRT       = Rt::count();      
 
@@ -59,7 +57,7 @@ class DashboardController extends Controller
 
         return view('dashboard', compact(
             'totalPenduduk', 'totalKK', 
-            'totalDusun', 'totalKampung', 'totalRW', 'totalRT',
+            'totalDusun', 'totalRW', 'totalRT',
             'totalLaki', 'totalPerempuan', 
             'kategoriUmur', 'statsPekerjaan', 'statsPendidikan',
             'pendudukTerbaru'

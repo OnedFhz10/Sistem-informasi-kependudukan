@@ -4,17 +4,32 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\KartuKeluarga;
-use App\Models\Rt; // <-- PENTING: Panggil Model RT
+use App\Models\Rt;
 
 class KartuKeluargaController extends Controller
 {
     // 1. TAMPILKAN DAFTAR KK
-    public function index()
+    public function index(Request $request)
     {
-        $kks = KartuKeluarga::with('rt.rw.dusun')
-                            ->withCount('penduduks')
-                            ->latest()
-                            ->paginate(10);
+        // 1. Siapkan Query Dasar (Load Relasi & Hitung Anggota)
+        $query = KartuKeluarga::with('rt.rw.dusun')
+                              ->withCount('penduduks');
+
+        // 2. Logika Smart Search
+        // Jika ada input 'search' dari pengguna...
+        if ($request->has('search') && $request->search != '') {
+            $search = $request->search;
+            
+            // Cari di Nomor KK, ATAU Nama Kepala Keluarga, ATAU Alamat
+            $query->where(function($q) use ($search) {
+                $q->where('nomor_kk', 'like', '%' . $search . '%')
+                  ->orWhere('kepala_keluarga', 'like', '%' . $search . '%')
+                  ->orWhere('alamat_lengkap', 'like', '%' . $search . '%');
+            });
+        }
+
+        // 3. Eksekusi Pagination (Tetap urutkan dari yang terbaru)
+        $kks = $query->latest()->paginate(10);
 
         return view('kartu-keluarga.index', compact('kks'));
     }
@@ -22,14 +37,12 @@ class KartuKeluargaController extends Controller
     // 2. FORM TAMBAH DATA
     public function create()
     {
-        // Kita butuh data RT agar user bisa memilih lokasi KK
-        // Kita load juga RW dan Dusun biar di dropdown jelas (misal: RT 01 / RW 02 - Dusun A)
+        // Kita hanya butuh data RT (RW dan Dusun ikut nempel di relasi)
         $rts = Rt::with('rw.dusun')->get();
-
         return view('kartu-keluarga.create', compact('rts'));
     }
 
-    // 3. PROSES SIMPAN DATA BARU
+    // 3. PROSES SIMPAN (VERSI BERSIH & OTOMATIS)
     public function store(Request $request)
     {
         $request->validate([
@@ -39,6 +52,8 @@ class KartuKeluargaController extends Controller
             'rt_id' => 'required|exists:rts,id',
         ]);
 
+        // CUKUP SATU BARIS!
+        // Model KartuKeluarga akan otomatis mencari RW & Dusun di background.
         KartuKeluarga::create($request->all());
 
         return redirect()->route('kk.index')
@@ -49,24 +64,23 @@ class KartuKeluargaController extends Controller
     public function edit($id)
     {
         $kk = KartuKeluarga::findOrFail($id);
-        $rts = Rt::with('rw.dusun')->get(); // Ambil data RT untuk dropdown
-
+        $rts = Rt::with('rw.dusun')->get(); 
         return view('kartu-keluarga.edit', compact('kk', 'rts'));
     }
 
-    // 5. PROSES UPDATE DATA
+    // 5. PROSES UPDATE (VERSI BERSIH & OTOMATIS)
     public function update(Request $request, $id)
     {
         $kk = KartuKeluarga::findOrFail($id);
 
         $request->validate([
-            // Validasi unik kecuali untuk dirinya sendiri
             'nomor_kk' => 'required|numeric|digits:16|unique:kartu_keluargas,nomor_kk,'.$kk->id,
             'kepala_keluarga' => 'required|string|max:255',
             'alamat_lengkap' => 'required|string',
             'rt_id' => 'required|exists:rts,id',
         ]);
 
+        // Update biasa. Model akan otomatis menyesuaikan RW/Dusun jika RT berubah.
         $kk->update($request->all());
 
         return redirect()->route('kk.index')
@@ -77,13 +91,16 @@ class KartuKeluargaController extends Controller
     public function destroy($id)
     {
         $kk = KartuKeluarga::findOrFail($id);
-        
-        // Opsional: Cek apakah KK masih punya anggota keluarga?
-        // Jika masih ada, sebaiknya jangan dihapus atau kosongkan dulu.
-        // Tapi untuk sekarang kita hapus saja (Relasi di database sudah 'Cascade' atau 'Set Null' tergantung migrasi)
         $kk->delete();
-
         return redirect()->route('kk.index')
                          ->with('success', 'Kartu Keluarga Berhasil Dihapus!');
+    }
+
+    public function show($id)
+    {
+        // Ambil data KK, lengkap dengan relasi ke RT, RW, Dusun, DAN Penduduknya
+        $kk = KartuKeluarga::with(['rt.rw.dusun', 'penduduks'])->findOrFail($id);
+
+        return view('kartu-keluarga.show', compact('kk'));
     }
 }

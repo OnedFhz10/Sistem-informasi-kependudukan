@@ -3,14 +3,14 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PendudukController;
-use App\Http\Controllers\KampungController;
 use App\Http\Controllers\ProfileController;
-// Jangan lupa import Controller KK dan Wilayah
 use App\Http\Controllers\KartuKeluargaController;
 use App\Http\Controllers\DusunController;
 use App\Http\Controllers\RwController;
 use App\Http\Controllers\RtController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController; 
+use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfilDesaController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -31,47 +31,60 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/detail', [DashboardController::class, 'getDetailData'])->name('dashboard.detail');
 
+    // --- SUB-MENU KEPENDUDUKAN (Letakkan PALING ATAS sebelum route {id}) ---
+    Route::get('/penduduk/meninggal', [PendudukController::class, 'indexMeninggal'])->name('penduduk.meninggal');
+    Route::get('/penduduk/pindah', [PendudukController::class, 'indexPindah'])->name('penduduk.pindah');
+    Route::get('/penduduk/pendatang', [PendudukController::class, 'indexPendatang'])->name('penduduk.pendatang');
+
     // --- READ ONLY (BISA DILIHAT STAFF & ADMIN) ---
-    // Staff butuh akses 'index' (melihat tabel) untuk data-data ini
+    
+    // 1. PENDUDUK
     Route::get('/penduduk', [PendudukController::class, 'index'])->name('penduduk.index');
-    Route::get('/kampung', [KampungController::class, 'index'])->name('kampung.index');
-    Route::get('/kk', [KartuKeluargaController::class, 'index'])->name('kk.index');     // <-- Perbaikan Error kk.index
-    Route::get('/dusun', [DusunController::class, 'index'])->name('dusun.index');       // <-- Agar menu Dusun jalan
-    Route::get('/rw', [RwController::class, 'index'])->name('rw.index');                // <-- Agar menu RW jalan
-    Route::get('/rt', [RtController::class, 'index'])->name('rt.index');                // <-- Agar menu RT jalan
-
     Route::get('/penduduk/export-excel', [PendudukController::class, 'exportExcel'])->name('penduduk.export-excel');
-
     Route::get('/penduduk/export-pdf', [PendudukController::class, 'exportPdf'])->name('penduduk.export-pdf');
+    
+    // PERBAIKAN: Tambahkan ->where('id', '[0-9]+') agar tidak menelan rute 'create'
+    Route::get('/penduduk/{id}', [PendudukController::class, 'show'])
+        ->name('penduduk.show')
+        ->where('id', '[0-9]+'); 
+
+    // 2. KARTU KELUARGA
+    Route::get('/kk', [KartuKeluargaController::class, 'index'])->name('kk.index');
+    
+    // PERBAIKAN: Tambahkan ->where('kk', '[0-9]+')
+    Route::get('/kk/{kk}', [KartuKeluargaController::class, 'show'])
+        ->name('kk.show')
+        ->where('kk', '[0-9]+');
+
+    // 3. WILAYAH (Index saja)
+    Route::get('/dusun', [DusunController::class, 'index'])->name('dusun.index');
+    Route::get('/rw', [RwController::class, 'index'])->name('rw.index');
+    Route::get('/rt', [RtController::class, 'index'])->name('rt.index');
+
 
     // --- KHUSUS ADMIN (FULL AKSES: Create, Edit, Delete) ---
     Route::middleware(['is_admin'])->group(function () {
         
-        // Modul Manajemen User (BARU)
-        Route::resource('users', App\Http\Controllers\UserController::class);
+        // Modul Manajemen User
+        Route::resource('users', UserController::class);
 
-        // Manajemen Profil Desa (BARU)
-        Route::get('/profil-desa', [App\Http\Controllers\ProfilDesaController::class, 'index'])->name('profil.index');
-        Route::put('/profil-desa', [App\Http\Controllers\ProfilDesaController::class, 'update'])->name('profil.update');
+        // Manajemen Profil Desa
+        Route::get('/profil-desa', [ProfilDesaController::class, 'index'])->name('profil.index');
+        Route::put('/profil-desa', [ProfilDesaController::class, 'update'])->name('profil.update');
 
-        // Penduduk
+        // Penduduk (Create, Store, Edit, Update, Destroy)
         Route::get('/penduduk/create', [PendudukController::class, 'create'])->name('penduduk.create');
         Route::post('/penduduk', [PendudukController::class, 'store'])->name('penduduk.store');
         Route::get('/penduduk/{id}/edit', [PendudukController::class, 'edit'])->name('penduduk.edit');
         Route::put('/penduduk/{id}', [PendudukController::class, 'update'])->name('penduduk.update');
         Route::delete('/penduduk/{id}', [PendudukController::class, 'destroy'])->name('penduduk.destroy');
+        // Route show sudah dipindah ke atas agar staff bisa akses
 
-        // Kampung (Kecuali Index yang sudah di atas)
-        Route::resource('kampung', KampungController::class)->except(['index', 'show']);
-
-        // KK & Wilayah (Kecuali Index yang sudah di atas)
+        // KK & Wilayah (Resource SISANYA selain Index & Show)
         Route::resource('kk', KartuKeluargaController::class)->except(['index', 'show']);
         Route::resource('dusun', DusunController::class)->except(['index', 'show']);
         Route::resource('rw', RwController::class)->except(['index', 'show']);
         Route::resource('rt', RtController::class)->except(['index', 'show']);
-    });
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 });

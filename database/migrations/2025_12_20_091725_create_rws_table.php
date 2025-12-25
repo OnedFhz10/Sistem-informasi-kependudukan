@@ -6,22 +6,23 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
-{
-    Schema::create('rws', function (Blueprint $table) {
-        $table->id();
-        $table->foreignId('dusun_id')->constrained('dusuns')->onDelete('cascade');
-        $table->string('nomor'); // Contoh: 001
-        $table->timestamps();
-    });
-}
+    {
+        Schema::create('rws', function (Blueprint $table) {
+            $table->id();
+            // Menghubungkan RW ke Dusun
+            $table->foreignId('dusun_id')->constrained('dusuns')->onDelete('cascade');
+            
+            $table->string('nomor'); // Contoh: "01", "02"
+            
+            // --- TAMBAHAN BARU ---
+            $table->string('kepala_rw')->nullable(); // Boleh kosong dulu
+            // ---------------------
 
-    /**
-     * Reverse the migrations.
-     */
+            $table->timestamps();
+        });
+    }
+
     public function down(): void
     {
         Schema::dropIfExists('rws');

@@ -11,13 +11,14 @@ class Penduduk extends Model
     protected $fillable = [
         'nik', 'nama_lengkap', 'tempat_lahir', 'tanggal_lahir', 
         'jenis_kelamin', 'status', 'pekerjaan', 'kartu_keluarga_id',
-        'pendidikan', 'status_hubungan', 'nama_ayah', 'nama_ibu'
+        'pendidikan', 'status_hubungan', 'nama_ayah', 'nama_ibu','tanggal_meninggal', 'tanggal_pindah', 'tanggal_datang'
     ];
 
     protected $casts = [
         'tanggal_lahir' => 'date',
-        'tanggal_wafat' => 'date',
+        'tanggal_meninggal' => 'date',
         'tanggal_pindah' => 'date',
+        'tanggal_datang' => 'date',
     ];
 
     protected function usia(): Attribute
